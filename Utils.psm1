@@ -20,19 +20,19 @@ function Test-PendingReboot {
 }
 
 
-# TODO #conf1: implement OPTIONAL ref parameter $choiceMade
-# TODO #conf1 NEW usage example: $confirmation = confirm 'Overwrite destination file: profile.ovpn' 'File already exists in destination folder. It will be overwritten. Do you want to continue?' ([System.Management.Automation.Host.ChoiceDescription]::new('&Yes','Overwrite the file.'), [System.Management.Automation.Host.ChoiceDescription]::new('&No','Cancel the operation and halt the script.'), [System.Management.Automation.Host.ChoiceDescription]::new('See &more options','See additional options (renaming the file, moving it, etc)'))
-# usage example: $confirmation = confirm 'Overwrite destination file: profile.ovpn' 'File already exists in destination folder. It will be overwritten. Do you want to continue?' ([System.Management.Automation.Host.ChoiceDescription]::new('&Yes','Overwrite the file.'), [System.Management.Automation.Host.ChoiceDescription]::new('&No','Cancel the operation and halt the script.'))
+# TODO #conf1 NEW usage example: $confirmation = confirm 'Overwrite destination file: profile.ovpn' 'File already exists in destination folder. It will be overwritten. Do you want to continue?' ([System.Management.Automation.Host.ChoiceDescription]::new('&Yes','Overwrite the file.'), [System.Management.Automation.Host.ChoiceDescription]::new('&No','Cancel the operation and halt the script.'), [System.Management.Automation.Host.ChoiceDescription]::new('See &more options','See additional options (renaming the file, moving it, etc)')) 1
+# usage example: $confirmation = confirm 'Overwrite destination file: profile.ovpn' 'File already exists in destination folder. It will be overwritten. Do you want to continue?' ([System.Management.Automation.Host.ChoiceDescription]::new('&Yes','Overwrite the file.'), [System.Management.Automation.Host.ChoiceDescription]::new('&No','Cancel the operation and halt the script.')) 1
 function confirm(
   [string] $title = '',
   [string] $prompt,
   [Collection[ChoiceDescription]] $choices = ('&Yes', '&No'),
-  [int] $default = -1
-  # [ref][Parameter(Mandatory = $false)][AllowNull()][int] $choiceMade = $null) # TODO #conf1
+  [int] $default = -1,
+  [int] $confirmIndex = 0
+  # [ref][Parameter(Mandatory = $false)][AllowNull()][int] $choiceMade = $null) # TODO #conf1 fix this
 ) {
   $decision = $Host.UI.PromptForChoice($title, $prompt, $choices, $default)
   # if ($choiceMade -is [ref]) { $choiceMade.value = $decision } # TODO #conf1
-  return $decision -eq 0
+  return $decision -eq $confirmIndex
 }
 
 
