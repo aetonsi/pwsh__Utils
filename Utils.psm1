@@ -1,5 +1,12 @@
+# https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.3
 using namespace System.Management.Automation.Host;
 using namespace System.Collections.ObjectModel;
+
+
+function Update-PowershellProfile {
+  . $PROFILE
+}
+
 
 function Test-PendingReboot {
   # https://stackoverflow.com/a/43596428/9156059
