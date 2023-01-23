@@ -36,26 +36,33 @@ function Test-PendingReboot {
 }
 
 
-# usage example: $confirmation = Get-Confirmation 'Overwrite destination file: profile.ovpn' 'File already exists in destination folder. It will be overwritten. Do you want to continue?' ([System.Management.Automation.Host.ChoiceDescription]::new('&Yes','Overwrite the file.'), [System.Management.Automation.Host.ChoiceDescription]::new('&No','Cancel the operation and halt the script.')) 1
+# usage example: $confirmation = Get-Confirmation 'File already exists: profile.ovpn' 'File already exists in destination folder. It will be overwritten. Do you want to continue?' -choices @('&Yes','&No') -choicesDescriptions @('Overwrite the file.','Cancel the operation and halt the script.') -defaultChoice 1
 function Get-Confirmation(
   [string] $title = '',
   [string] $prompt,
-  [Collection[ChoiceDescription]] $choices = ('&Yes', '&No'),
+  [string[]] $choices = @('&Yes', '&No'),
   [int] $default = -1,
-  [int] $confirmIndex = 0
+  [int] $confirmIndex = 0,
+  [string[]] $choicesDescriptions = @()
 ) {
-  $decision = Get-Choice -title $title -prompt $prompt -choices $choices -default $default
+  $decision = Get-Choice -title $title -prompt $prompt -choices $choices -default $default -choicesDescriptions $choicesDescriptions
   return $decision -eq $confirmIndex
 }
 
-# usage example: $choice = Get-Choice 'File already exists: profile.ovpn' 'File already exists in destination folder. What would you like to do?' ([System.Management.Automation.Host.ChoiceDescription]::new('&Overwrite','Overwrite the destination file.'), [System.Management.Automation.Host.ChoiceDescription]::new('&Cancel','Cancel the operation and halt the script.'), [System.Management.Automation.Host.ChoiceDescription]::new('&Rename the file','Automatically rename the file by appending a suffix to its name.')) 1
+# usage example: $choice = Get-Choice 'File already exists: profile.ovpn' 'File already exists in destination folder. What would you like to do?' -choices @('&Overwrite','&Cancel','&Rename the file') -choicesDescriptions @('Overwrite the destination file.','Cancel the operation and halt the script.','Automatically rename the file by appending a suffix to its name.') -defaultChoice 1
 function Get-Choice(
   [string] $title = '',
   [string] $prompt,
-  [Collection[ChoiceDescription]] $choices,
-  [int] $default = -1
+  [string[]] $choices,
+  [int] $defaultChoice = -1,
+  [string[]] $choicesDescriptions = @()
 ) {
-  return $Host.UI.PromptForChoice($title, $prompt, $choices, $default)
+  $choiceCollection = [Collection[ChoiceDescription]]::new()
+  for ($i = 0; $i -lt $choices.Length; $i++) {
+    $choice = [ChoiceDescription]::new($choices[$i], $choicesDescriptions[$i])
+    $choiceCollection.Add($choice)
+  }
+  return $Host.UI.PromptForChoice($title, $prompt, $choiceCollection, $defaultChoice)
 }
 
 
