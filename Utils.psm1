@@ -8,6 +8,15 @@ function Update-PowershellProfile {
 }
 
 
+
+function New-TemporaryDirectory {
+  # https://stackoverflow.com/a/34559554
+  $parent = [System.IO.Path]::GetTempPath()
+  $name = [System.IO.Path]::GetRandomFileName()
+  return New-Item -ItemType Directory -Path (Join-Path $parent $name)
+}
+
+
 function Test-PendingReboot {
   # https://stackoverflow.com/a/43596428/9156059
   # https://gist.github.com/altrive/5329377
