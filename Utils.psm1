@@ -3,7 +3,7 @@ using namespace System.Management.Automation.Host;
 using namespace System.Collections.ObjectModel;
 
 
-function Update-PowershellProfile {
+function Import-PowershellProfile {
   . $PROFILE
 }
 
