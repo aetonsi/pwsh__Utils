@@ -1,5 +1,21 @@
+# https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.3
 using namespace System.Management.Automation.Host;
 using namespace System.Collections.ObjectModel;
+
+
+function Update-PowershellProfile {
+  . $PROFILE
+}
+
+
+
+function New-TemporaryDirectory {
+  # https://stackoverflow.com/a/34559554
+  $parent = [System.IO.Path]::GetTempPath()
+  $name = [System.IO.Path]::GetRandomFileName()
+  return New-Item -ItemType Directory -Path (Join-Path $parent $name)
+}
+
 
 function Test-PendingReboot {
   # https://stackoverflow.com/a/43596428/9156059
