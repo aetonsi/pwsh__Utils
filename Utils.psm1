@@ -3,6 +3,12 @@ using namespace System.Management.Automation.Host;
 using namespace System.Collections.ObjectModel;
 
 
+function Test-AmIAdministrator () {
+  $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+  return $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+
 function Import-PowershellProfile {
   . $PROFILE
 }
