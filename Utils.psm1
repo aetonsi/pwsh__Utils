@@ -191,19 +191,26 @@ function Get-ArraySlice(
   [int] $Offset,
   [AllowNull()][Nullable[System.Int32]] $Length = $null
 ) {
-  if ($Offset -notin 0..$Array.Length) {
+  if ($Offset -notin 0..($Array.Length - 1)) {
     throw "invalid offset $Offset"
   }
-  $result = @()
-  :loop for ($i = $Offset; $i -lt $Array.Length; $i++) {
-    $val = $Array[$i]
-    if (($null -eq $Length) -or ($i -lt ($Offset + $Length))) {
-      $result += $val
-    } else {
-      break loop
-    }
+  if ($null -eq $Length) { $endIndex = $Array.Length - 1 }
+  else { $endIndex = $Offset + $Length - 1 }
+  return $Array[$Offset..$endIndex]
+}
+
+function ConvertFrom-HashtableToObject([Parameter(Mandatory, ValueFromPipeline)] $Value) {
+  if ($Value -isnot [System.Collections.Hashtable]) { return $Value }
+  return ($Value | ForEach-Object { [PSCustomObject]$_ })
+}
+
+function Format-Matrix([array] $Matrix, [switch] $AsList) {
+  $data = $Matrix | ForEach-Object { $_ | ConvertFrom-HashtableToObject }
+  if (!$AsList) {
+    $data | Format-Table
+  } else {
+    $data | Format-List
   }
-  return $result
 }
 
 function get_last_object_by_path([object] $Obj, [string] $KeyPath) {
