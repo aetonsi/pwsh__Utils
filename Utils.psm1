@@ -15,6 +15,8 @@ function Get-Prop([Parameter(ValueFromPipeline)] $Obj, [string] $Prop) {
 
 function Get-FirstApplication([Parameter(ValueFromPipeline)][string] $Name, [switch] $AsPath) {
   # TODO move to more specific module?
+  # TODO check out: https://learn.microsoft.com/en-us/windows/win32/shell/app-registration (example: brave)
+  # TODO rename to Find-Application
   $where = ((& where.exe $name 2>$null) -split "`n")[0]
   if ($where) {
     $gcm = Get-Command -Name $name -CommandType ([System.Management.Automation.CommandTypes]::Application) -ea silentlycontinue
@@ -85,12 +87,21 @@ function Test-AmIAdministrator () {
   return $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
+function Test-AmIMemberOfAdministratorsGroup {
+  # taken from https://gerardog.github.io/gsudo/docs/tips/script-self-elevation
+  ([System.Security.Principal.WindowsIdentity]::GetCurrent()).Claims.Value -contains 'S-1-5-32-544'
+}
 
 
 function Test-PendingReboot {
-  # https://stackoverflow.com/a/43596428/9156059
-  # https://gist.github.com/altrive/5329377
-  # https://web.archive.org/web/20190503035319/https://gallery.technet.microsoft.com/scriptcenter/Get-PendingReboot-Query-bdb79542
+  # check out:
+  #     https://adamtheautomator.com/pending-reboot-registry/
+  #     https://github.com/adbertram/Random-PowerShell-Work/blob/master/Random%20Stuff/Test-PendingReboot.ps1
+  #     wait for:
+  #
+  #     https://stackoverflow.com/a/43596428/9156059
+  #     https://gist.github.com/altrive/5329377
+  #     https://web.archive.org/web/20190503035319/https://gallery.technet.microsoft.com/scriptcenter/Get-PendingReboot-Query-bdb79542
   if (Get-ChildItem 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -EA Ignore) { return $true }
   if (Get-Item 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -EA Ignore) { return $true }
   if (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name PendingFileRenameOperations -EA Ignore) { return $true }
