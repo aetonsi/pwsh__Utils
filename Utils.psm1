@@ -92,30 +92,34 @@ function Test-AmIMemberOfAdministratorsGroup {
   ([System.Security.Principal.WindowsIdentity]::GetCurrent()).Claims.Value -contains 'S-1-5-32-544'
 }
 
-
-function Test-PendingReboot {
-  # check out:
-  #     https://adamtheautomator.com/pending-reboot-registry/
-  #     https://github.com/adbertram/Random-PowerShell-Work/blob/master/Random%20Stuff/Test-PendingReboot.ps1
-  #     wait for:
-  #
-  #     https://stackoverflow.com/a/43596428/9156059
-  #     https://gist.github.com/altrive/5329377
-  #     https://web.archive.org/web/20190503035319/https://gallery.technet.microsoft.com/scriptcenter/Get-PendingReboot-Query-bdb79542
-  if (Get-ChildItem 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -EA Ignore) { return $true }
-  if (Get-Item 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -EA Ignore) { return $true }
-  if (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name PendingFileRenameOperations -EA Ignore) { return $true }
-  try {
-    # TODO test $util = Invoke-Command -ScriptBlock { $ErrorActionPreference = 'ignore'; return ([wmiclass]'\.\root\ccm\clientsdk:CCM_ClientUtilities') } -ea Ignore
-    $util = [wmiclass]'\.\root\ccm\clientsdk:CCM_ClientUtilities'
-    $status = $util.DetermineIfRebootPending()
-    if (($null -ne $status) -and $status.RebootPending) {
-      return $true
-    }
-  } catch {}
-  return $false
+if (!(Get-Module -ListAvailable PendingReboot) -or !(Get-Command Test-PendingReboot)) {
+  function Test-PendingReboot (
+    [switch]$SkipConfigurationManagerClientCheck, # [NOOP] emulate psgallery module: https://github.com/bcwilhite/PendingReboot/
+    [switch]$Detailed # [NOOP] emulate psgallery module: https://github.com/bcwilhite/PendingReboot/
+  ) {
+    # check out:
+    #     https://adamtheautomator.com/pending-reboot-registry/
+    #     https://github.com/adbertram/Random-PowerShell-Work/blob/master/Random%20Stuff/Test-PendingReboot.ps1
+    #     wait for:
+    #
+    #     https://stackoverflow.com/a/43596428/9156059
+    #     https://gist.github.com/altrive/5329377
+    #     https://web.archive.org/web/20190503035319/https://gallery.technet.microsoft.com/scriptcenter/Get-PendingReboot-Query-bdb79542
+    if (Get-ChildItem 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending' -EA Ignore) { return $true }
+    if (Get-Item 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired' -EA Ignore) { return $true }
+    if (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' -Name PendingFileRenameOperations -EA Ignore) { return $true }
+    try {
+      # TODO silence error somehow. try with:
+      #     $util = Invoke-Command -ScriptBlock { $ErrorActionPreference = 'ignore'; return ([wmiclass]'\.\root\ccm\clientsdk:CCM_ClientUtilities') } -ea Ignore
+      $util = [wmiclass]'\.\root\ccm\clientsdk:CCM_ClientUtilities'
+      $status = $util.DetermineIfRebootPending()
+      if (($null -ne $status) -and $status.RebootPending) {
+        return ([pscustomobject]@{ComputerName = $env:COMPUTERNAME; IsRebootPending = $true })
+      }
+    } catch {}
+    return ([pscustomobject]@{ComputerName = $env:COMPUTERNAME; IsRebootPending = $false })
+  }
 }
-
 
 # usage example: $confirmation = Get-Confirmation 'File already exists: profile.ovpn' 'File already exists in destination folder. It will be overwritten. Do you want to continue?' -choices @('&Yes','&No') -choicesDescriptions @('Overwrite the file.','Cancel the operation and halt the script.') -defaultChoice 1
 function Get-Confirmation(
