@@ -6,7 +6,7 @@ if ('Desktop' -ieq $PSVersionTable.PSEdition) {
     switch ($true) {
         $IsWindows { New-Constant 'PSVersionTable.OS' -Value "$((& cmd /c ver) -replace '\[Version ', '' -replace '\]', '')".Trim() }
         $IsLinux { New-Constant 'PSVersionTable.OS' -Value "$(& uname -srv)".Trim() }
-        $IsMacOS { New-Constant 'PSVersionTable.OS' -Value '???' } # TODO
+        $IsMacOS { New-Constant 'PSVersionTable.OS' -Value '???' } # TODO https://www.cyberciti.biz/faq/mac-osx-find-tell-operating-system-version-from-bash-prompt/
         default { throw 'wth is it' }
     }
 }
