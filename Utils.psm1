@@ -82,6 +82,32 @@ function Set-PsPrompt($prompt = $null, [switch]$restore) {
   }
 }
 
+
+# inspired by https://stackoverflow.com/a/29758367
+function Invoke-Ternary {
+  param(
+    [Parameter(Mandatory, Position = 0)] $Condition,
+    [Parameter(Mandatory, Position = 1)] $IfTrue,
+    [Parameter(Mandatory, Position = 2)] $IfFalse,
+    [switch] $EvalIfTrueBlock,
+    [switch] $EvalIfFalseBlock
+  )
+  if ($Condition) {
+    if ($EvalIfTrueBlock) {
+      & $IfTrue
+    } else {
+      $IfTrue
+    }
+  } else {
+    if ($EvalIfFalseBlock) {
+      & $IfFalse
+    } else {
+      $IfFalse
+    }
+  }
+}
+Set-Alias -Option AllScope -Scope 'Global' -Force -Name '?:' -Value Invoke-Ternary
+
 function Test-AmIAdministrator () {
   $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
   return $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
