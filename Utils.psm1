@@ -8,6 +8,10 @@ using namespace System.Collections.ObjectModel
 Import-Module -Scope Local $PSScriptRoot\pwsh__String\String.psm1
 
 
+function Get-ShellFolder([string] $FolderName) {
+  return ([Environment]::GetFolderPath($FolderName) ?? (New-Object -ComObject shell.application).NameSpace($FolderName).Self.Path)
+}
+
 
 function Get-Prop([Parameter(ValueFromPipeline)] $Obj, [string] $Prop) {
   return $Obj.$Prop
@@ -292,4 +296,4 @@ function Set-ObjectPropertyByPath([object] $Obj, [string] $KeyPath, $Value, [swi
 
 . "$PSScriptRoot/globals.ps1"
 
-Export-ModuleMember -Function *
+Export-ModuleMember -Function *-*
